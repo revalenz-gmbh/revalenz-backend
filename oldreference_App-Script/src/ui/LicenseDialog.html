@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lizenz aktivieren</title>
+  
+  <!-- Styling -->
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 20px;
+      background-color: #f5f5f5;
+    }
+
+    .container {
+      max-width: 500px;
+      margin: 0 auto;
+      background-color: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    h1 {
+      color: #333;
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 5px;
+      color: #666;
+    }
+
+    input[type="text"] {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 16px;
+    }
+
+    .button-group {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 30px;
+    }
+
+    button {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 4px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    button.primary {
+      background-color: #2196f3;
+      color: white;
+    }
+
+    button.primary:hover {
+      background-color: #1976d2;
+    }
+
+    button.secondary {
+      background-color: #f5f5f5;
+      color: #333;
+    }
+
+    button.secondary:hover {
+      background-color: #e0e0e0;
+    }
+
+    .message {
+      margin-top: 20px;
+      padding: 10px;
+      border-radius: 4px;
+      display: none;
+    }
+
+    .message.success {
+      background-color: #e8f5e9;
+      border: 1px solid #c8e6c9;
+      color: #2e7d32;
+    }
+
+    .message.error {
+      background-color: #ffebee;
+      border: 1px solid #ffcdd2;
+      color: #c62828;
+    }
+
+    .license-info {
+      margin-top: 20px;
+      padding: 15px;
+      background-color: #f5f5f5;
+      border-radius: 4px;
+      display: none;
+    }
+
+    .license-info h3 {
+      margin-top: 0;
+      color: #333;
+    }
+
+    .license-info p {
+      margin: 5px 0;
+      color: #666;
+    }
+
+    .feature-list {
+      list-style: none;
+      padding: 0;
+      margin: 10px 0;
+    }
+
+    .feature-list li {
+      padding: 5px 0;
+      color: #666;
+    }
+
+    .feature-list li:before {
+      content: "✓";
+      color: #4caf50;
+      margin-right: 5px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Lizenz aktivieren</h1>
+    
+    <div class="form-group">
+      <label for="licenseKey">Lizenzschlüssel</label>
+      <input type="text" id="licenseKey" placeholder="XXXXX-XXXXX-XXXXX-XXXXX">
+    </div>
+
+    <div class="button-group">
+      <button class="secondary" onclick="cancel()">Abbrechen</button>
+      <button class="primary" onclick="activateLicense()">Aktivieren</button>
+    </div>
+
+    <div id="message" class="message"></div>
+
+    <div id="licenseInfo" class="license-info">
+      <h3>Lizenzinformationen</h3>
+      <p><strong>Typ:</strong> <span id="licenseType"></span></p>
+      <p><strong>Gültig bis:</strong> <span id="licenseExpires"></span></p>
+      <p><strong>Funktionen:</strong></p>
+      <ul id="licenseFeatures" class="feature-list"></ul>
+    </div>
+  </div>
+
+  <script>
+    // Zeige eine Nachricht an
+    function showMessage(message, type) {
+      const messageDiv = document.getElementById('message');
+      messageDiv.textContent = message;
+      messageDiv.className = `message ${type}`;
+      messageDiv.style.display = 'block';
+    }
+
+    // Zeige die Lizenzinformationen an
+    function showLicenseInfo(license) {
+      const infoDiv = document.getElementById('licenseInfo');
+      document.getElementById('licenseType').textContent = license.type;
+      document.getElementById('licenseExpires').textContent = new Date(license.expiresAt).toLocaleDateString('de-DE');
+      
+      const featuresList = document.getElementById('licenseFeatures');
+      featuresList.innerHTML = '';
+      license.features.forEach(feature => {
+        const li = document.createElement('li');
+        li.textContent = feature;
+        featuresList.appendChild(li);
+      });
+
+      infoDiv.style.display = 'block';
+    }
+
+    // Aktiviere die Lizenz
+    async function activateLicense() {
+      const licenseKey = document.getElementById('licenseKey').value.trim();
+      
+      if (!licenseKey) {
+        showMessage('Bitte geben Sie einen Lizenzschlüssel ein', 'error');
+        return;
+      }
+
+      try {
+        const result = await google.script.run
+          .withSuccessHandler(response => {
+            if (response.success) {
+              showMessage(response.message, 'success');
+              showLicenseInfo(response.license);
+            } else {
+              showMessage(response.message, 'error');
+            }
+          })
+          .withFailureHandler(error => {
+            showMessage(`Fehler: ${error.message}`, 'error');
+          })
+          .activateLicense(licenseKey);
+      } catch (error) {
+        showMessage(`Fehler: ${error.message}`, 'error');
+      }
+    }
+
+    // Breche den Dialog ab
+    function cancel() {
+      google.script.host.close();
+    }
+  </script>
+</body>
+</html> 

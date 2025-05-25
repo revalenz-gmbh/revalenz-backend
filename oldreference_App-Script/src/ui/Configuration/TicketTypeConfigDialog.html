@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Tickettypen & Preise konfigurieren</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 24px; }
+    h2 { color: #2a4d7a; }
+    label { display: block; margin-top: 16px; font-weight: bold; }
+    textarea { width: 100%; min-height: 120px; font-family: monospace; margin-top: 4px; border-radius: 4px; border: 1px solid #ccc; padding: 8px; }
+    .error { color: red; margin-top: 8px; display: none; }
+    .button-group { margin-top: 24px; text-align: right; }
+    button { padding: 10px 24px; border: none; border-radius: 4px; font-size: 1em; cursor: pointer; }
+    .save { background: #2a4d7a; color: #fff; }
+    .cancel { background: #aaa; color: #fff; margin-right: 10px; }
+  </style>
+</head>
+<body>
+  <h2>Tickettypen & Preise konfigurieren</h2>
+  <form id="configForm">
+    <label for="ticketTypeMapping">Tickettypen & Preise (JSON):</label>
+    <textarea id="ticketTypeMapping" name="ticketTypeMapping" required></textarea>
+    <div id="jsonError" class="error">Ungültiges JSON-Format!</div>
+    <div class="button-group">
+      <button type="button" class="cancel" onclick="google.script.host.close()">Abbrechen</button>
+      <button type="submit" class="save">Speichern</button>
+    </div>
+  </form>
+  <script>
+    // Lade aktuelle Konfiguration
+    google.script.run.withSuccessHandler(function(config) {
+      document.getElementById('ticketTypeMapping').value = config.ticketTypeMapping || '[\n  { "typ": "Standard", "preis": 20, "beschreibung": "Reguläres Ticket" }\n]';
+    }).getConfigurationValues();
+
+    // Validierung und Speichern
+    document.getElementById('configForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const jsonField = document.getElementById('ticketTypeMapping');
+      const errorDiv = document.getElementById('jsonError');
+      try {
+        JSON.parse(jsonField.value);
+        errorDiv.style.display = 'none';
+      } catch (e) {
+        errorDiv.style.display = 'block';
+        return;
+      }
+      google.script.run.withSuccessHandler(function(msg) {
+        alert(msg);
+        google.script.host.close();
+      }).withFailureHandler(function(error) {
+        alert('Fehler beim Speichern: ' + error.message);
+      }).saveConfiguration({ ticketTypeMapping: jsonField.value });
+    });
+  </script>
+</body>
+</html> 

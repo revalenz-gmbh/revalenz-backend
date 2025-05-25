@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Ticket Scanner</title>
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+  <style>
+    .scanner-container {
+      width: 100%;
+      max-width: 640px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    #qr-video {
+      width: 100%;
+      max-width: 640px;
+      margin: 20px 0;
+    }
+    .result-container {
+      margin: 20px 0;
+      padding: 20px;
+      border-radius: 4px;
+    }
+    .success { background-color: #a5d6a7; }
+    .error { background-color: #ef9a9a; }
+  </style>
+</head>
+<body>
+  <div class="scanner-container">
+    <h4>Ticket Scanner</h4>
+    
+    <div class="row">
+      <div class="col s12">
+        <video id="qr-video"></video>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col s12">
+        <div id="result" class="result-container" style="display: none;"></div>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col s12">
+        <button class="btn waves-effect waves-light" onclick="toggleScanner()">
+          <i class="material-icons left">camera</i>Scanner starten
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+  <script src="https://unpkg.com/qr-scanner/qr-scanner.umd.min.js"></script>
+  <script>
+    let scanner = null;
+    
+    function initScanner() {
+      const videoElement = document.getElementById('qr-video');
+      scanner = new QrScanner(videoElement, result => handleScan(result));
+    }
+
+    function toggleScanner() {
+      if (!scanner) {
+        initScanner();
+      }
+      
+      if (scanner.isStarting()) {
+        return;
+      }
+      
+      if (scanner.hasFlash) {
+        scanner.toggleFlash();
+      }
+      
+      if (scanner.isScanning()) {
+        scanner.stop();
+      } else {
+        scanner.start();
+      }
+    }
+
+    function handleScan(result) {
+      const resultContainer = document.getElementById('result');
+      
+      google.script.run
+        .withSuccessHandler(showSuccess)
+        .withFailureHandler(showError)
+        .validateTicket(result);
+    }
+
+    function showSuccess(response) {
+      const resultContainer = document.getElementById('result');
+      resultContainer.className = 'result-container success';
+      resultContainer.innerHTML = `
+        <h5>Ticket gültig!</h5>
+        <p>Ticket-ID: ${response.ticketId}</p>
+        <p>Besitzer: ${response.owner}</p>
+      `;
+      resultContainer.style.display = 'block';
+    }
+
+    function showError(error) {
+      const resultContainer = document.getElementById('result');
+      resultContainer.className = 'result-container error';
+      resultContainer.innerHTML = `
+        <h5>Fehler</h5>
+        <p>${error.message || 'Unbekannter Fehler'}</p>
+      `;
+      resultContainer.style.display = 'block';
+    }
+  </script>
+</body>
+</html> 

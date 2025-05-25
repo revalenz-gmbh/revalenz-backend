@@ -1,0 +1,87 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model events {
+  id           Int       @id @default(autoincrement())
+  tenant_id    Int?
+  name         String
+  description  String?
+  event_date   DateTime? @db.Timestamp(6)
+  location     String?
+  ticket_limit Int?
+  created_at   DateTime? @default(now()) @db.Timestamp(6)
+  orders       orders[]
+  tickets      tickets[]
+}
+
+model orders {
+  id                Int       @id @default(autoincrement())
+  tenant_id         Int?
+  event_id          Int?
+  customer_name     String?
+  customer_email    String?
+  status            String?   @default("PENDING")
+  reservation_until DateTime? @db.Timestamp(6)
+  created_at        DateTime? @default(now()) @db.Timestamp(6)
+  updated_at        DateTime? @default(now()) @db.Timestamp(6)
+  payment_method    String?
+  payment_status    String?
+  payment_reference String?
+  metadata          Json?
+  events            events?   @relation(fields: [event_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  tickets           tickets[]
+}
+
+model tenants {
+  id         Int       @id @default(autoincrement())
+  name       String    @unique
+  email      String?
+  domain     String?
+  created_at DateTime? @default(now()) @db.Timestamp(6)
+}
+
+model ticket_mail_logs {
+  id              Int       @id @default(autoincrement())
+  ticket_id       Int?
+  sent_at         DateTime? @db.Timestamp(6)
+  recipient_email String?
+  status          String?
+  error_message   String?
+  tickets         tickets?  @relation(fields: [ticket_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model tickets {
+  id               Int                @id @default(autoincrement())
+  event_id         Int?
+  order_id         Int?
+  ticket_code      String             @unique
+  type             String?
+  owner_name       String?
+  owner_email      String?
+  quantity         Int?               @default(1)
+  status           String?            @default("PENDING")
+  created_at       DateTime?          @default(now()) @db.Timestamp(6)
+  updated_at       DateTime?          @default(now()) @db.Timestamp(6)
+  metadata         Json?
+  ticket_mail_logs ticket_mail_logs[]
+  events           events?            @relation(fields: [event_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  orders           orders?            @relation(fields: [order_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model User {
+  id          Int      @id @default(autoincrement())
+  tenant_id   Int
+  email       String   @unique
+  password    String
+  name        String?
+  role        String
+  status      String   @default("active")
+  created_at  DateTime @default(now())
+}
+

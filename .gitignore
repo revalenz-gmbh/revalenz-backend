@@ -31,3 +31,4 @@ build/
 # Testing
 coverage/
 .nyc_output/ 
+/src/generated/prisma

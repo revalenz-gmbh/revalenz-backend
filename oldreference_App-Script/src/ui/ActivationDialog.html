@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top">
+    <style>
+      .container {
+        padding: 20px;
+        font-family: Arial, sans-serif;
+      }
+      .header {
+        margin-bottom: 20px;
+      }
+      .input-group {
+        margin-bottom: 15px;
+      }
+      input[type="text"] {
+        width: 100%;
+        padding: 8px;
+        margin: 5px 0;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+      }
+      button {
+        background-color: #4285f4;
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+      }
+      button:hover {
+        background-color: #3367d6;
+      }
+      .error {
+        color: #d32f2f;
+        margin-top: 10px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <h2>Ticket-Service Aktivierung</h2>
+        <p>Bitte geben Sie Ihren Lizenzschlüssel ein:</p>
+      </div>
+      
+      <div class="input-group">
+        <input type="text" id="licenseKey" placeholder="XXXX-XXXX-XXXX-XXXX">
+      </div>
+      
+      <button onclick="activate()">Aktivieren</button>
+      
+      <div id="error" class="error" style="display: none;"></div>
+    </div>
+
+    <script>
+      function activate() {
+        const licenseKey = document.getElementById('licenseKey').value;
+        const errorDiv = document.getElementById('error');
+        
+        if (!licenseKey) {
+          errorDiv.textContent = 'Bitte geben Sie einen Lizenzschlüssel ein.';
+          errorDiv.style.display = 'block';
+          return;
+        }
+        
+        google.script.run
+          .withSuccessHandler(function(response) {
+            if (response.success) {
+              google.script.host.close();
+              google.script.run.onOpen();
+            } else {
+              errorDiv.textContent = 'Fehler: ' + response.message;
+              errorDiv.style.display = 'block';
+            }
+          })
+          .withFailureHandler(function(error) {
+            errorDiv.textContent = 'Fehler: ' + error.message;
+            errorDiv.style.display = 'block';
+          })
+          .activateLicense(licenseKey);
+      }
+    </script>
+  </body>
+</html> 

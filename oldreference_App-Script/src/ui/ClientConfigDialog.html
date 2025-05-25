@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Client-Konfiguration</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 24px; }
+    h2 { color: #2a4d7a; }
+    label { display: block; margin-top: 16px; font-weight: bold; }
+    input[type="text"] { width: 100%; box-sizing: border-box; padding: 6px; margin-top: 4px; border-radius: 4px; border: 1px solid #ccc; }
+    .section { margin-bottom: 24px; }
+    table { width: 100%; border-collapse: collapse; margin-top: 16px; }
+    th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+    th { background: #f3f3f3; }
+    input[type="number"] { width: 100%; box-sizing: border-box; padding: 6px; }
+    .button-group { margin-top: 24px; text-align: right; }
+    button { padding: 8px 18px; border: none; border-radius: 4px; font-size: 1em; cursor: pointer; }
+    .save { background: #2a4d7a; color: #fff; }
+    .cancel { background: #aaa; color: #fff; margin-right: 10px; }
+    .add-row { background: #4CAF50; color: #fff; margin-bottom: 12px; }
+    .remove-row { background: #f44336; color: #fff; }
+    .error { color: red; margin-top: 8px; display: none; }
+  </style>
+</head>
+<body>
+  <h2>Client-Konfiguration</h2>
+  <form id="configForm">
+    <div class="section">
+      <label for="eventName">Veranstaltungsname:</label>
+      <input type="text" id="eventName" name="eventName" required>
+
+      <label for="orgName">Organisation:</label>
+      <input type="text" id="orgName" name="orgName" required>
+
+      <label for="templateUrl">Ticketvorlage (Google Slides Link):</label>
+      <input type="text" id="templateUrl" name="templateUrl" placeholder="https://docs.google.com/presentation/d/..." required>
+
+      <label for="vipFolderId">Ablageordner für VIP-Tickets (Drive-Link oder ID):</label>
+      <input type="text" id="vipFolderId" name="vipFolderId" placeholder="Ordner-ID oder Link">
+
+      <label for="licenseKey">Lizenzschlüssel:</label>
+      <input type="text" id="licenseKey" name="licenseKey">
+
+      <label for="licenseEmail">Lizenz-E-Mail:</label>
+      <input type="text" id="licenseEmail" name="licenseEmail">
+    </div>
+
+    <div class="section">
+      <label>Tickettypen & Preise:</label>
+      <button type="button" class="add-row" onclick="addRow()">+ Tickettyp hinzufügen</button>
+      <table id="ticketTypeTable">
+        <thead>
+          <tr>
+            <th>Tickettyp</th>
+            <th>Preis (€)</th>
+            <th>Beschreibung</th>
+            <th>Entfernen</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Zeilen werden dynamisch eingefügt -->
+        </tbody>
+      </table>
+      <div id="tableError" class="error">Bitte mindestens einen Tickettyp mit Preis angeben!</div>
+    </div>
+
+    <div class="button-group">
+      <button type="button" class="cancel" onclick="google.script.host.close()">Abbrechen</button>
+      <button type="submit" class="save">Speichern</button>
+    </div>
+  </form>
+  <script>
+    // Hilfsfunktion zum Erstellen einer Tabellenzeile
+    function createRow(type = '', price = '', desc = '') {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td><input type="text" value="${type}" required></td>
+        <td><input type="number" min="0" step="0.01" value="${price}" required></td>
+        <td><input type="text" value="${desc}"></td>
+        <td><button type="button" class="remove-row" title="Entfernen" onclick="removeRow(this)">✕</button></td>
+      `;
+      return tr;
+    }
+
+    // Zeile hinzufügen
+    function addRow(type = '', price = '', desc = '') {
+      document.getElementById('ticketTypeTable').querySelector('tbody').appendChild(createRow(type, price, desc));
+    }
+
+    // Zeile entfernen
+    function removeRow(btn) {
+      btn.closest('tr').remove();
+    }
+
+    // Bestehende Konfiguration laden
+    google.script.run.withSuccessHandler(function(config) {
+      document.getElementById('eventName').value = config.eventName || '';
+      document.getElementById('orgName').value = config.orgName || '';
+      document.getElementById('templateUrl').value = config.templateUrl || '';
+      document.getElementById('vipFolderId').value = config.vipFolderId || '';
+      document.getElementById('licenseKey').value = config.licenseKey || '';
+      document.getElementById('licenseEmail').value = config.licenseEmail || '';
+      let arr;
+      try {
+        arr = JSON.parse(config.ticketTypeMapping);
+      } catch (e) {
+        arr = [];
+      }
+      if (arr.length === 0) addRow();
+      arr.forEach(function(t) { addRow(t.typ, t.preis, t.beschreibung); });
+    }).getConfigurationValues();
+
+    // Formular-Handler
+    document.getElementById('configForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const rows = Array.from(document.querySelectorAll('#ticketTypeTable tbody tr'));
+      const errorDiv = document.getElementById('tableError');
+      const types = rows.map(function(row) {
+        const cells = row.querySelectorAll('input');
+        return {
+          typ: cells[0].value.trim(),
+          preis: parseFloat(cells[1].value),
+          beschreibung: cells[2].value.trim()
+        };
+      }).filter(t => t.typ && !isNaN(t.preis));
+      if (types.length === 0) {
+        errorDiv.style.display = 'block';
+        return;
+      }
+      errorDiv.style.display = 'none';
+      const config = {
+        eventName: document.getElementById('eventName').value.trim(),
+        orgName: document.getElementById('orgName').value.trim(),
+        templateUrl: document.getElementById('templateUrl').value.trim(),
+        vipFolderId: document.getElementById('vipFolderId').value.trim(),
+        licenseKey: document.getElementById('licenseKey').value.trim(),
+        licenseEmail: document.getElementById('licenseEmail').value.trim(),
+        ticketTypeMapping: JSON.stringify(types)
+      };
+      google.script.run.withSuccessHandler(function(msg) {
+        alert(msg);
+        google.script.host.close();
+      }).withFailureHandler(function(error) {
+        alert('Fehler beim Speichern: ' + error.message);
+      }).saveConfiguration(config);
+    });
+  </script>
+</body>
+</html> 

@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Ticket bestellen</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 24px; }
+    h2 { color: #2a4d7a; }
+    form { max-width: 400px; margin: auto; }
+    label { display: block; margin-top: 16px; font-weight: bold; }
+    input, select { width: 100%; padding: 8px; margin-top: 4px; border-radius: 4px; border: 1px solid #ccc; }
+    button { margin-top: 24px; padding: 10px 24px; background: #2a4d7a; color: #fff; border: none; border-radius: 4px; font-size: 1em; cursor: pointer; }
+    button:disabled { background: #aaa; }
+    .success { color: green; margin-top: 16px; }
+    .error { color: red; margin-top: 16px; }
+  </style>
+</head>
+<body>
+  <h2>Ticket selbst bestellen</h2>
+  <form id="ticketForm">
+    <label for="name">Name</label>
+    <input type="text" id="name" name="name" required>
+
+    <label for="email">E-Mail</label>
+    <input type="email" id="email" name="email" required>
+
+    <label for="event">Veranstaltung</label>
+    <input type="text" id="event" name="event" required>
+
+    <label for="ticketType">Ticket-Typ</label>
+    <select id="ticketType" name="ticketType" required>
+      <option value="">Bitte wählen...</option>
+      <option value="Standard">Standard</option>
+      <option value="VIP">VIP</option>
+      <option value="Kind">Kind</option>
+    </select>
+
+    <label for="quantity">Anzahl</label>
+    <input type="number" id="quantity" name="quantity" min="1" max="10" value="1" required>
+
+    <button type="submit" id="submitBtn">Ticket bestellen</button>
+    <div id="feedback"></div>
+  </form>
+
+  <script>
+    const form = document.getElementById('ticketForm');
+    const feedback = document.getElementById('feedback');
+    const submitBtn = document.getElementById('submitBtn');
+
+    form.addEventListener('submit', function(e) {
+      e.preventDefault();
+      feedback.textContent = '';
+      submitBtn.disabled = true;
+      const data = {
+        name: form.name.value.trim(),
+        email: form.email.value.trim(),
+        event: form.event.value.trim(),
+        ticketType: form.ticketType.value,
+        quantity: parseInt(form.quantity.value, 10)
+      };
+      google.script.run.withSuccessHandler(function(result) {
+        feedback.textContent = 'Ticket(s) erfolgreich bestellt!';
+        feedback.className = 'success';
+        form.reset();
+        submitBtn.disabled = false;
+      }).withFailureHandler(function(error) {
+        feedback.textContent = 'Fehler: ' + error.message;
+        feedback.className = 'error';
+        submitBtn.disabled = false;
+      }).selfServiceOrderTicket(data);
+    });
+  </script>
+</body>
+</html> 
