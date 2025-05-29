@@ -1,0 +1,19 @@
+# Verzeichnisse, die nicht ins Docker-Image sollen
+mandanten_widgets
+oldreference_App-Script
+revalenz-frontend-mirror
+
+# Dokumentationsdateien, die nicht benötigt werden
+ARCHITEKTUR_GUIDE.md
+Development_Guide_Backend.md
+AUTH_API_ENDPOINTS.md
+
+# Typische weitere Ausschlüsse
+node_modules
+npm-debug.log
+Dockerfile
+.dockerignore
+.git
+.gitignore
+.env
+gmail-auth-setup.js

@@ -1,11 +1,13 @@
+const express = require('express');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
 const JWT_SECRET = process.env.JWT_SECRET || 'deinGeheimerJWTKey';
+const router = express.Router();
 
-async function loginUser(req, res) {
+router.post('/login', async (req, res) => {
   const { email, password } = req.body;
 
   // User suchen
@@ -33,6 +35,6 @@ async function loginUser(req, res) {
   );
 
   res.json({ token });
-}
+});
 
-module.exports = loginUser;
+module.exports = router;
