@@ -18,11 +18,11 @@ router.post('/resend-verification', async (req, res) => {
       data: { verificationToken }
     });
     const verificationUrl = `https://deine-domain.de/auth/verify?token=${verificationToken}`;
-    await sendMail({
-      to: email,
-      subject: 'Bitte bestätige deine E-Mail-Adresse',
-      text: `Hallo,\n\nbitte bestätige deine E-Mail-Adresse erneut:\n${verificationUrl}\n\nViele Grüße,\nDein Revalenz-Team`
-    });
+    // await sendMail({
+    //   to: email,
+    //   subject: 'Bitte bestätige deine E-Mail-Adresse erneut',
+    //   text: `Hallo,\n\nbitte bestätige deine E-Mail-Adresse erneut, indem du auf diesen Link klickst:\n${verificationUrl}\n\nViele Grüße,\nDein Revalenz-Team`
+    // });
     res.json({ message: 'Verifizierungs-E-Mail wurde erneut gesendet.' });
   } catch (err) {
     console.error(err);

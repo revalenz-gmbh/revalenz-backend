@@ -27,6 +27,15 @@ app.use('/api/tickets', ticketsRouter); // Ticket-Service
 app.use('/api/tenants', tenantsRoutes); // Mandantenverwaltung
 app.use('/auth', authRoutes);            // Authentifizierung (Login, Register, Reset, Verify)
 
+// Health-Check-Route
+app.get('/health', (req, res) => res.json({ status: 'ok' }));
+
+// Globaler Error-Handler
+app.use((err, req, res, next) => {
+  console.error('Globaler Fehler:', err);
+  res.status(500).json({ error: 'Interner Serverfehler' });
+});
+
 // --- Serverstart ---
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, '0.0.0.0', () => {

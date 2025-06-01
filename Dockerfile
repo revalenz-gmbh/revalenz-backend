@@ -1,7 +1,7 @@
 # 1. Basis-Image (Node.js LTS)
-FROM node:20-slim
+FROM node:20
 
-# Systempakete aktualisieren und nicht benötigte entfernen
+# Systempakete aktualisieren und nicht benötigte entfernen (ohne OpenSSL-Install)
 RUN apt-get update && apt-get upgrade -y && apt-get autoremove -y && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # 2. Arbeitsverzeichnis anlegen

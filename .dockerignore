@@ -2,6 +2,9 @@
 mandanten_widgets
 oldreference_App-Script
 revalenz-frontend-mirror
+revalenz-backend.git
+revalenz-frontend.git.bfg-report
+
 
 # Dokumentationsdateien, die nicht benötigt werden
 ARCHITEKTUR_GUIDE.md
