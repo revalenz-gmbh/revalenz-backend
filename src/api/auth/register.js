@@ -28,11 +28,11 @@ router.post('/register', async (req, res) => {
 
     // Bestätigungs-E-Mail senden
     const verificationUrl = `https://deine-domain.de/auth/verify?token=${verificationToken}`;
-    // await sendMail({
-    //   to: email,
-    //   subject: 'Bitte bestätige deine E-Mail-Adresse',
-    //   text: `Hallo,\n\nbitte bestätige deine E-Mail-Adresse, indem du auf diesen Link klickst:\n${verificationUrl}\n\nViele Grüße,\nDein Revalenz-Team`
-    // });
+      await sendMail({
+       to: email,
+       subject: 'Bitte bestätige deine E-Mail-Adresse',
+       text: `Hallo,\n\nbitte bestätige deine E-Mail-Adresse, indem du auf diesen Link klickst:\n${verificationUrl}\n\nViele Grüße,\nDein Revalenz-Team`
+      });
 
     res.status(201).json({ message: 'Registrierung erfolgreich! Bitte E-Mail bestätigen.' });
   } catch (err) {

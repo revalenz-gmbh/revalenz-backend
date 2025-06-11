@@ -7,7 +7,7 @@
     "start": "node src/server.js"
   },
   "dependencies": {
-    "@prisma/client": "^6.8.2",
+    "@prisma/client": "^6.9.0",
     "bcrypt": "^6.0.0",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
@@ -16,7 +16,7 @@
     "jsonwebtoken": "^9.0.2",
     "open": "^10.1.2",
     "pg": "^8.16.0",
-    "prisma": "^6.8.2"
+    "prisma": "^6.9.0"
   },
   "devDependencies": {
     "@types/bcrypt": "^5.0.2",

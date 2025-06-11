@@ -20,11 +20,11 @@ router.post('/request-reset', async (req, res) => {
     });
 
     const resetUrl = `https://deine-domain.de/auth/reset?token=${resetToken}`;
-    // await sendMail({
-    //   to: email,
-    //   subject: 'Passwort zurücksetzen',
-    //   text: `Hallo,\n\nbitte setze dein Passwort über diesen Link zurück:\n${resetUrl}\n\nViele Grüße,\nDein Revalenz-Team`
-    // });
+     await sendMail({
+       to: email,
+       subject: 'Passwort zurücksetzen',
+       text: `Hallo,\n\nbitte setze dein Passwort über diesen Link zurück:\n${resetUrl}\n\nViele Grüße,\nDein Revalenz-Team`
+     });
 
     res.status(200).json({ message: 'Falls die E-Mail existiert, wurde eine Nachricht verschickt.' });
   } catch (err) {

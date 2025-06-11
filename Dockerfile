@@ -1,29 +1,48 @@
-# 1. Basis-Image (Node.js LTS)
-FROM node:20
+# Build Stage
+FROM node:20-slim AS builder
 
-# Systempakete aktualisieren und nicht benötigte entfernen (ohne OpenSSL-Install)
-RUN apt-get update && apt-get upgrade -y && apt-get autoremove -y && apt-get clean && rm -rf /var/lib/apt/lists/*
-
-# 2. Arbeitsverzeichnis anlegen
+# Arbeitsverzeichnis anlegen
 WORKDIR /app
 
-# 3. package.json und package-lock.json kopieren
+# Abhängigkeiten kopieren und installieren
 COPY package*.json ./
+COPY prisma ./prisma/
+RUN npm ci
 
-# 4. Abhängigkeiten installieren
-RUN npm install
-
-# 5. Prisma-Schema und Migrationen kopieren
-COPY prisma ./prisma
-
-# 6. Prisma Client generieren
+# Prisma Client generieren
 RUN npx prisma generate
 
-# 7. Restlichen Code kopieren
+# Production Stage
+FROM node:20-slim AS production
+
+# Systempakete aktualisieren und OpenSSL 3.0.x installieren
+RUN apt-get update && \
+    apt-get install -y openssl && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+# Nur notwendige Dateien aus dem Builder kopieren
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/package*.json ./
+COPY --from=builder /app/prisma ./prisma
+COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
+
+# Anwendungsdateien kopieren
 COPY . .
 
-# 8. Port freigeben (z.B. 3000)
-EXPOSE 3000
+# Umgebungsvariablen setzen
+ENV NODE_ENV=production
+ENV PORT=8080
+ENV PRISMA_CLIENT_ENGINE_TYPE=binary
 
-# 9. Startbefehl
+# Port freigeben
+EXPOSE 8080
+
+# Healthcheck hinzufügen
+HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
+    CMD curl -f http://localhost:8080/health || exit 1
+
+# Startbefehl
 CMD ["node", "src/server.js"]
