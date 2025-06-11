@@ -19,7 +19,7 @@ router.post('/request-reset', async (req, res) => {
       data: { resetToken, resetTokenExpiry }
     });
 
-    const resetUrl = `https://deine-domain.de/auth/reset?token=${resetToken}`;
+    const resetUrl = `https://revalenz-backend-920300921634.europe-west1.run.app/auth/reset?token=${resetToken}`;
      await sendMail({
        to: email,
        subject: 'Passwort zurücksetzen',

@@ -84,8 +84,8 @@ model User {
   role        String
   status      String   @default("active")
   created_at  DateTime @default(now())
-  verificationToken String? // Für E-Mail-Bestätigung
-  resetToken        String? // Für Passwort-Reset
+  verificationToken String? @unique // Für E-Mail-Bestätigung
+  resetToken        String? @unique // Für Passwort-Reset
   resetTokenExpiry  DateTime? // Ablaufzeit für Reset-Token
 }
 
