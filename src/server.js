@@ -89,6 +89,10 @@ app.use('/api/tickets', ticketsRouter); // Ticket-Service
 app.use('/api/tenants', tenantsRoutes); // Mandantenverwaltung
 app.use('/auth', authRoutes);            // Authentifizierung (Login, Register, Reset, Verify)
 
+// E-Mail-Service Routes (für Frontend-Kompatibilität)
+const emailRoutes = require('./api/email');
+app.use('/api/email', emailRoutes);
+
 // Erweiterter Health-Check-Endpunkt
 app.get('/health', async (req, res) => {
   try {
@@ -104,7 +108,10 @@ app.get('/health', async (req, res) => {
       },
       env: {
         nodeEnv: process.env.NODE_ENV,
-        databaseUrl: process.env.DATABASE_URL ? 'ist gesetzt' : 'ist NICHT gesetzt'
+        databaseUrl: process.env.DATABASE_URL ? 'ist gesetzt' : 'ist NICHT gesetzt',
+        gmailClientId: process.env.GMAIL_CLIENT_ID ? 'ist gesetzt' : 'ist NICHT gesetzt',
+        gmailClientSecret: process.env.GMAIL_CLIENT_SECRET ? 'ist gesetzt' : 'ist NICHT gesetzt',
+        gmailRefreshToken: process.env.GMAIL_REFRESH_TOKEN ? 'ist gesetzt' : 'ist NICHT gesetzt'
       }
     });
   } catch (error) {
@@ -114,6 +121,32 @@ app.get('/health', async (req, res) => {
       timestamp: new Date().toISOString(),
       error: 'Datenbankverbindung fehlgeschlagen',
       details: error.message
+    });
+  }
+});
+
+// Test-E-Mail-Endpoint
+app.get('/test-email', async (req, res) => {
+  const { sendMail } = require('./utils/emailService');
+  
+  try {
+    console.log('Test-E-Mail wird versendet...');
+    await sendMail({
+      to: 'ihre-email@example.com', // Ändern Sie das zu Ihrer E-Mail!
+      subject: 'Test E-Mail von Revalenz Backend',
+      text: 'Das ist eine Test-E-Mail. Wenn Sie das lesen, funktioniert das E-Mail-System!'
+    });
+    
+    console.log('Test-E-Mail erfolgreich versendet!');
+    res.json({ 
+      success: true, 
+      message: 'Test-E-Mail versendet' 
+    });
+  } catch (error) {
+    console.error('Test-E-Mail Fehler:', error);
+    res.status(500).json({ 
+      error: 'email_failed', 
+      message: error.message 
     });
   }
 });

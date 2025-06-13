@@ -10,7 +10,10 @@ router.get('/verify', async (req, res) => {
   console.log('Verify-Request erhalten:', { token: token ? 'vorhanden' : 'fehlt' });
   
   if (!token) {
-    return res.status(400).send('Token fehlt');
+    return res.status(400).json({
+      error: 'missing_token',
+      message: 'Token fehlt'
+    });
   }
   
   try {
@@ -19,7 +22,10 @@ router.get('/verify', async (req, res) => {
     
     if (!user) {
       console.log('User mit Token nicht gefunden');
-      return res.status(400).send('Ungültiger oder abgelaufener Token');
+      return res.status(400).json({
+        error: 'invalid_token',
+        message: 'Ungültiger oder abgelaufener Token'
+      });
     }
     
     console.log('User gefunden, aktualisiere Status...', { userId: user.id, email: user.email });
@@ -30,13 +36,19 @@ router.get('/verify', async (req, res) => {
     });
     
     console.log('User erfolgreich aktiviert!');
-    res.send('E-Mail erfolgreich bestätigt! Du kannst dich jetzt einloggen.');
+    res.json({
+      success: true,
+      message: 'E-Mail erfolgreich verifiziert'
+    });
     
   } catch (err) {
     console.error('Verify-Fehler:', err);
     console.error('Error Code:', err.code);
     console.error('Error Message:', err.message);
-    res.status(500).send(`Serverfehler: ${err.message}`);
+    res.status(500).json({
+      error: 'server_error',
+      message: 'Serverfehler bei der Verifizierung'
+    });
   }
 });
 

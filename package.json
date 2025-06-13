@@ -8,6 +8,9 @@
   },
   "dependencies": {
     "@prisma/client": "^6.9.0",
+    "@types/node": "^24.0.1",
+    "@types/react": "^19.1.8",
+    "axios": "^1.9.0",
     "bcrypt": "^6.0.0",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
@@ -16,7 +19,8 @@
     "jsonwebtoken": "^9.0.2",
     "open": "^10.1.2",
     "pg": "^8.16.0",
-    "prisma": "^6.9.0"
+    "prisma": "^6.9.0",
+    "react-toastify": "^11.0.5"
   },
   "devDependencies": {
     "@types/bcrypt": "^5.0.2",
