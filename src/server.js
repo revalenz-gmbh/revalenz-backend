@@ -62,10 +62,10 @@ async function testDatabaseConnection() {
 const allowedOrigins = process.env.CORS_ORIGINS 
   ? process.env.CORS_ORIGINS.split(',')
   : [
-      'http://localhost:3000',
-      'http://localhost:5173',
-      'https://ask.revalenz.de',
-      'https://www.revalenz.de'
+    'http://localhost:3000',
+    'http://localhost:5173',
+    'https://ask.revalenz.de',
+    'https://www.revalenz.de'
     ];
 
 // --- Middleware ---
