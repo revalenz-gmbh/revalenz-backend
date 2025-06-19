@@ -1,5 +1,5 @@
 # Verzeichnisse, die nicht ins Docker-Image sollen
-oldreference_App-Script
+legacy_reference
 revalenz-backend.git
 
 
